@@ -1,0 +1,50 @@
+# Python virtual environments
+venv/
+env/
+.env/
+*.venv
+.venv/
+
+# Conda environments
+conda_env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Sensitive Information
+.env
+*.env
+secrets.py
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE Settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+# logs/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Specific to your project
+polymarket_api_key.txt
+
+# Temporary files
+*.swp
+*~
+.*.kate-swp
+.swp.*
