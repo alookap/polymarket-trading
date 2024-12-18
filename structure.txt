@@ -1,0 +1,124 @@
+GPT version:
+
+project_root/
+│
+├── data/                   # 数据模块
+│   ├── raw/                # 原始数据存储
+│   ├── processed/          # 处理后的数据
+│   ├── loaders/            # 数据加载与预处理脚本
+│   ├── database.py         # 数据库管理接口
+│   └── utils.py            # 数据处理相关工具
+│
+├── monitor/                # 实时监控模块
+│   ├── alerts.py           # 异常监控和通知
+│   ├── health_check.py     # 系统运行状态检查
+│   └── dashboard/          # 前端监控仪表盘
+│       └── app.py          # 基于 Flask/Dash 的实时监控页面
+│
+├── research/               # 研究模块（支持 Jupyter Notebook）
+│   ├── notebooks/          # 存放 Jupyter Notebook 文件
+│   │   ├── analysis1.ipynb
+│   │   ├── backtest.ipynb
+│   │   └── strategy_evaluation.ipynb
+│   ├── scripts/            # 研究相关的辅助脚本
+│   │   ├── backtesting.py  # 回测框架
+│   │   ├── analytics.py    # 数据分析工具
+│   │   └── visualization.py# 可视化工具
+│   └── results/            # 实验结果（图片、表格等）
+│
+├── trading/                # 交易模块
+│   ├── execution.py        # 执行逻辑
+│   ├── risk.py             # 风控模块
+│   ├── strategy/           # 策略模块
+│   │   ├── strategy1.py
+│   │   └── strategy2.py
+│   └── broker/             # 经纪商相关接口
+│       ├── binance.py
+│       ├── interactivebrokers.py
+│       └── broker_base.py
+│
+├── tests/                  # 测试模块
+│   ├── test_data.py        # 测试数据模块
+│   ├── test_trading.py     # 测试交易模块
+│   └── test_monitor.py     # 测试监控模块
+│
+├── configs/                # 配置文件
+│   ├── config.yaml         # 系统全局配置
+│   └── secrets.yaml        # API 密钥等敏感配置
+│
+├── logs/                   # 日志存储
+│   ├── trading.log         # 交易相关日志
+│   ├── monitor.log         # 监控相关日志
+│   └── research.log        # 研究相关日志
+│
+├── main.py                 # 系统主入口
+├── requirements.txt        # 项目依赖
+└── README.md               # 项目说明文档
+
+Claude version:
+
+trading-research-system/
+│
+├── .github/                # CI/CD and workflow configurations
+│   └── workflows/
+│
+├── data/                   # Data management
+│   ├── raw/                # Original, unprocessed data
+│   ├── processed/          # Cleaned and transformed data
+│   └── external/           # Third-party or external data sources
+│
+├── src/                    # Source code
+│   ├── data_collection/    # APIs, data downloading scripts
+│   │   ├── __init__.py
+│   │   ├── market_data.py
+│   │   └── fundamentals.py
+│
+│   ├── data_processing/    # Data cleaning, transformation
+│   │   ├── __init__.py
+│   │   ├── cleaners.py
+│   │   └── transformers.py
+│
+│   ├── trading/            # Trading logic
+│   │   ├── __init__.py
+│   │   ├── strategy.py
+│   │   ├── portfolio.py
+│   │   └── risk_management.py
+│
+│   ├── monitoring/         # Real-time monitoring
+│   │   ├── __init__.py
+│   │   ├── performance_tracker.py
+│   │   └── alert_system.py
+│
+│   └── utils/              # Shared utility functions
+│       ├── __init__.py
+│       ├── logging.py
+│       └── config.py
+│
+├── research/               # Research and analysis
+│   ├── notebooks/          # Jupyter notebooks for exploration
+│   │   ├── exploratory_analysis.ipynb
+│   │   ├── strategy_backtesting.ipynb
+│   │   └── market_correlation.ipynb
+│   │
+│   ├── reports/            # Generated research reports
+│   │   └── markdown/
+│   │
+│   └── scripts/            # Research-related scripts
+│
+├── tests/                  # Unit and integration tests
+│   ├── test_data_collection/
+│   ├── test_trading/
+│   └── test_monitoring/
+│
+├── configs/                # Configuration files
+│   ├── trading_config.yaml
+│   └── logging_config.json
+│
+├── logs/                   # Application logs
+│
+├── requirements.txt        # Python dependencies
+├── setup.py                # Package setup
+├── README.md               # Project documentation
+├── .env                    # Environment variables
+├── .gitignore
+└── pyproject.toml          # Modern Python project configuration

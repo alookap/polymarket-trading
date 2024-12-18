@@ -1,0 +1,56 @@
+{
+    "enable_order_book": false,
+    "active": true,
+    "closed": true,
+    "archived": false,
+    "accepting_orders": false,
+    "accepting_order_timestamp": "2024-11-22T22:39:36Z",
+    "minimum_order_size": 5,
+    "minimum_tick_size": 0.001,
+    "condition_id": "0xa5aeffa26126c3a16e21e7331c3fe7fe4e7895fe9af17885fb2fdf903c0e8e27",
+    "question_id": "0xeceb1a15bc4ca68ef97c38e579ab071b567d72c2427eaa998c31bcf05f2eb300",
+    "question": "Will 'Astro Bot' win Game of the Year?",
+    "description": "The Game Awards are scheduled to be held on December 12, 2024 at the Peacock Theater in Los Angeles, USA.\n\nThis market will resolve to \"Yes\" if \"Astro Bot\" wins The 2024 Game Award for Game of the Year. Otherwise, this market will resolve to \"No\".\n\nThe primary resolution source for this market will be official information from The Game Awards (e.g. information found at thegameawards.com/), including live broadcast, however a consensus of credible reporting may also be used.",
+    "market_slug": "will-astro-bot-win-game-of-the-year",
+    "end_date_iso": "2024-12-12T00:00:00Z",
+    "game_start_time": null,
+    "seconds_delay": 0,
+    "fpmm": "",
+    "maker_base_fee": 0,
+    "taker_base_fee": 0,
+    "notifications_enabled": true,
+    "neg_risk": true,
+    "neg_risk_market_id": "0xeceb1a15bc4ca68ef97c38e579ab071b567d72c2427eaa998c31bcf05f2eb300",
+    "neg_risk_request_id": "0x35d975ed441d5d3cf420794fc4853f062b1a630bb888f46df649d71848b06d08",
+    "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-astro-bot-win-game-of-the-year-1IRrILMozarr.jpg",
+    "image": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-astro-bot-win-game-of-the-year-1IRrILMozarr.jpg",
+    "rewards": {
+        "rates": [
+            {
+                "asset_address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+                "rewards_daily_rate": 30
+            }
+        ],
+        "min_size": 50,
+        "max_spread": 3.5
+    },
+    "is_50_50_outcome": false,
+    "tokens": [
+        {
+            "token_id": "109086111481151685580583446795363010567016155289579074668261476451284442936230",
+            "outcome": "Yes",
+            "price": 1,
+            "winner": true
+        },
+        {
+            "token_id": "76779425970094392791725207670955003966467350597493219122475705271224395163942",
+            "outcome": "No",
+            "price": 0,
+            "winner": false
+        }
+    ],
+    "tags": [
+        "Esports",
+        "Pop Culture"
+    ]
+}
