@@ -2,6 +2,7 @@ from sortedcontainers import SortedDict
 from typing import Optional, List, Tuple
 from custom_types import PriceLevel
 from decimal import Decimal
+from itertools import islice
 
 class OrderBook:
     """纯粹的订单簿实现，只负责维护价格和数量"""
@@ -61,11 +62,26 @@ class OrderBook:
         best_ask = PriceLevel(self.asks.peekitem(0)[0], self.asks.peekitem(0)[1]) if self.asks else None
         return best_bid, best_ask
 
-    def get_price_levels(self, depth: int) -> Tuple[List[PriceLevel], List[PriceLevel]]: # 0.x
-        """获取指定深度的价格水平"""
-        bids = [PriceLevel(p, s) for p, s in list(self.bids.items())[-depth:]]
-        asks = [PriceLevel(p, s) for p, s in list(self.asks.items())[:depth]]
+    def get_price_levels(self, depth: int) -> Tuple[List[PriceLevel], List[PriceLevel]]:
+        """获取指定深度的价格水平，优化时间复杂度"""
+        # 获取最优买单（倒序）和卖单（正序）的前depth项
+        bids = [PriceLevel(p, s) for p, s in islice(reversed(self.bids.items()), depth)]
+        asks = [PriceLevel(p, s) for p, s in islice(self.asks.items(), depth)]
         return bids, asks
+    
+    def get_size_at_level(self, side: str, price: Decimal) -> Decimal:
+        """
+        获取指定价格水平的订单数量
+        :param side: 'BUY' or 'SELL'
+        :param price: 价格水平
+        :return: 指定价格水平的订单数量，若不存在则返回0
+        """
+        if side == 'BUY':
+            return self.bids.get(price, Decimal("0"))
+        elif side == 'SELL':
+            return self.asks.get(price, Decimal("0"))
+        else:
+            raise ValueError("Invalid side. Use 'BUY' or 'SELL'.")
     
     def get_yes_position(self) -> Decimal:
         return self.yes_position
