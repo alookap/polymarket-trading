@@ -69,6 +69,20 @@ class OrderBook:
         asks = [PriceLevel(p, s) for p, s in islice(self.asks.items(), depth)]
         return bids, asks
     
+    def get_size_at_level(self, side: str, price: Decimal) -> Decimal:
+        """
+        获取指定价格水平的订单数量
+        :param side: 'BUY' or 'SELL'
+        :param price: 价格水平
+        :return: 指定价格水平的订单数量，若不存在则返回0
+        """
+        if side == 'BUY':
+            return self.bids.get(price, Decimal("0"))
+        elif side == 'SELL':
+            return self.asks.get(price, Decimal("0"))
+        else:
+            raise ValueError("Invalid side. Use 'BUY' or 'SELL'.")
+    
     def get_yes_position(self) -> Decimal:
         return self.yes_position
     
