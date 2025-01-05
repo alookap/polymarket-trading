@@ -21,7 +21,7 @@ class OrderManager:
     def __init__(self, api_client):
         self.api_client = api_client
         self.active_orders: Dict[str, Order] = {}  # order_id -> Order
-        self.market_orders: Dict[str, List[str]] = {}  # yes_token_id -> price -> [order_id]
+        self.market_orders: Dict[str, List[str]] = {}  # market_id -> price -> [order_id] ##? 怎么分别判断yes and no sides?
         self.logger = logging.getLogger(__name__)
         self.executor = ThreadPoolExecutor(max_workers=5)  # 创建线程池
 
@@ -72,7 +72,7 @@ class OrderManager:
             if isinstance(order_id_or_ids, str):
                 cancel_resp = await self._run_in_executor(self.api_client.cancel_order, order_id_or_ids)
                 self._remove_order(cancel_resp['canceled'])
-                ### If cancel successfully or not
+
             elif isinstance(order_id_or_ids, list):
                 cancel_resp = await self._run_in_executor(self.api_client.cancel_orders, order_id_or_ids)
                 self._remove_order(cancel_resp['canceled'])
@@ -84,7 +84,7 @@ class OrderManager:
             self.logger.error(f"Failed to cancel order(s) {order_id_or_ids}: {e}")
             raise
 
-    async def cancel_all_orders(self, market_id: str): # market_id ## not complete ## token id & market id
+    async def cancel_all_orders(self, market_id: str): # market_id
         """
         取消特定市场的所有订单
         """
@@ -95,7 +95,7 @@ class OrderManager:
             self.logger.error(f"Failed to cancel order at market: {e}")
             raise
 
-    async def handle_order_update(self, response: OrderResponse): # 在order filled之后调用
+    async def handle_order_update(self, response: OrderResponse): # 在order filled之后调用 ### 这里怎么用？
         """
         处理订单状态更新
         """
@@ -121,10 +121,10 @@ class OrderManager:
         )
         self.active_orders[order_id] = order
 
-        token_id = request.yes_asset_id
-        if token_id not in self.market_orders:
-            self.market_orders[token_id] = []
-        self.market_orders[token_id].append(order_id) ### 有没有必要改成双层索引？可以marginal提速
+        market_id = request.market_id
+        if market_id not in self.market_orders:
+            self.market_orders[market_id] = []
+        self.market_orders[market_id].append(order_id) ### 有没有必要改成双层索引？可以marginal提速
 
     def _remove_order(self, order_ids: Union[str, List[str]]):
         """
@@ -134,10 +134,10 @@ class OrderManager:
             order_ids = [order_ids]
         for order_id in order_ids:
             if order_id in self.active_orders:
-                order = self.active_orders.pop(order_id)
-                token_id = order.request.yes_asset_id
-                if token_id in self.market_orders:
-                    self.market_orders[token_id].remove(order_id)
+                order = self.active_orders.pop(order_id) # 复杂度多少
+                market_id = order.request.market_id
+                if market_id in self.market_orders:
+                    self.market_orders[market_id].remove(order_id)
                     # 最后一个元素remove掉需不需要删除？从实际场景考虑不删除更好
                     # remove followed by add func
 
