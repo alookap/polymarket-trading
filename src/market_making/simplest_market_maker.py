@@ -5,7 +5,7 @@ from .base_market_maker import BaseMarketMaker
 from .custom_types import OrderRequest, PriceLevel
 from .orderbook import OrderBook
 
-class simplest_market_maker(BaseMarketMaker):
+class SimplestMM(BaseMarketMaker):
     def __init__(
         self,
         orderbook: OrderBook,
