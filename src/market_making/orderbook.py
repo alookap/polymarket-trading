@@ -1,12 +1,17 @@
 from sortedcontainers import SortedDict
 from typing import Optional, List, Tuple
-from custom_types import PriceLevel
+from .custom_types import PriceLevel
 from decimal import Decimal
 from itertools import islice
+from asyncio import Event
+import logging
+
+logger = logging.getLogger(__name__)
 
 class OrderBook:
     """纯粹的订单簿实现，只负责维护价格和数量"""
     def __init__(self, market_id, yes_token_id, no_token_id):
+        self.initialized = Event()  # 添加初始化完成事件
         self.market_id = market_id
         self.yes_token_id = yes_token_id
         self.no_token_id = no_token_id
@@ -31,6 +36,10 @@ class OrderBook:
             price = Decimal(level['price'])
             size = Decimal(level['size'])
             self.asks[price] = size
+            
+        if not self.initialized.is_set():  # 首次更新时标记初始化完成
+            logger.info("Order book initialized")
+            self.initialized.set()
 
     def handle_price_change(self, changes: List[dict]): # 0.1s
         """处理单个价格变化"""

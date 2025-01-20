@@ -1,5 +1,5 @@
 # runner.py
-import os
+import sys
 import asyncio
 import logging
 import signal
@@ -117,12 +117,16 @@ class MarketMakingRunner:
         
     def _setup_signal_handlers(self):
         """设置信号处理器"""
-        for sig in (signal.SIGTERM, signal.SIGINT):
-            asyncio.get_event_loop().add_signal_handler(
-                sig,
-                lambda: asyncio.create_task(self.stop())
-            )
-            
+        if sys.platform == 'win32':
+            signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self.stop()))
+            signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self.stop()))
+        else:
+            for sig in (signal.SIGTERM, signal.SIGINT):
+                asyncio.get_event_loop().add_signal_handler(
+                    sig,
+                    lambda: asyncio.create_task(self.stop())
+                )
+                
     def _create_market_handler(self): ### 需不需要 async def
         """创建市场数据处理器"""
         async def handler(data):
@@ -198,6 +202,11 @@ class MarketMakingRunner:
             
             # 启动WebSocket连接
             ws_task = asyncio.create_task(self.ws_manager.start())
+            
+            # 等待order book初始化完成
+            logger.info("Waiting for order book initialization...")
+            await self.order_book.initialized.wait()
+            logger.info("Order book initialized, starting strategy loop...")
             
             # 启动策略循环
             strategy_task = asyncio.create_task(self._strategy_loop())
