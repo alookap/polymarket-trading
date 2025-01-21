@@ -130,26 +130,19 @@ class MarketMakingRunner:
         ws_manager.add_user_handler(self.user_handler)
         
         return ws_manager
-        
-        
-    def _create_user_handler(self): ### 需不需要async def? 不需要放在这里？
-        """创建用户数据处理器"""
-        async def handler(data):
-            try:
-                # 处理订单更新
-                if isinstance(data, dict) and 'event_type' in data:
-                    await self.order_manager.handle_order_update(data)
-                    
-                # 更新策略持仓
-                new_position = self.order_book.get_total_position()
-                self.strategy.update_position(new_position)
-                
-            except Exception as e:
-                logger.error(f"Error in user handler: {e}", exc_info=True)
-                await self.stop()
-                
-        return handler
-        
+    
+    def _setup_signal_handlers(self):
+        """设置信号处理器"""
+        if sys.platform == 'win32':
+            signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self.stop()))
+            signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self.stop()))
+        else:
+            for sig in (signal.SIGTERM, signal.SIGINT):
+                asyncio.get_event_loop().add_signal_handler(
+                    sig,
+                    lambda: asyncio.create_task(self.stop())
+                )
+            
     async def _strategy_loop(self):
         """策略执行循环"""
         logger.info("Starting strategy loop...")
