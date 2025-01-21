@@ -16,6 +16,7 @@ class SimpleMarketMaker(BaseMarketMaker):
         no_asset_id: str,
         width: Decimal = Decimal('0.01'),  # 20 bps spread
         price_threshold: Decimal = Decimal('0.001'),  # 10 bps threshold for updates
+        tick_size: Decimal = Decimal('0.001')
     ):
         super().__init__(orderbook, market_id, yes_asset_id, no_asset_id)
         self.width = width
@@ -23,6 +24,7 @@ class SimpleMarketMaker(BaseMarketMaker):
         self.last_fair_price: Optional[Decimal] = None
 
         self.normal_size = Decimal('5')
+        self.tick_size = tick_size
 
         self.yes_position: Decimal = Decimal('0')
         self.no_position: Decimal = Decimal('0')
@@ -122,7 +124,7 @@ class SimpleMarketMaker(BaseMarketMaker):
                 )
             )
 
-        if self.no_position > ask_size:
+        if self.no_position > bid_size:
             # sell order on no token
             orders.append(
                 OrderRequest(
