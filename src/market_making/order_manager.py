@@ -54,6 +54,7 @@ class OrderManager:
             if gtc_resp['success'] == True:
                 if gtc_resp['status'] == 'live':
                     self._add_order(gtc_resp['orderID'], request)
+                    self.logger.info(f"Successfully placed order: {request}")
                 return gtc_resp['orderID'] ### Maybe we dont need to return anything
             else:
                 self.logger.error(f"Failed to place order: {gtc_resp['errorMsg']}")

@@ -19,14 +19,18 @@ async def main():
     setup_logging()
 
     # 从环境变量读取（或者直接硬编码）
-    PRIVATE_KEY = os.getenv("PRIVATE_KEY", "0x...")
+    PRIVATE_KEY = os.getenv("PK", "0x...")
     AGENCY_ADDRESS = os.getenv("AGENCY_ADDRESS", "0x...")
     API_KEY = os.getenv("CLOB_API_KEY")
     API_SECRET = os.getenv("CLOB_SECRET")
     API_PASS = os.getenv("CLOB_PASS_PHRASE")
-    CONDITION_ID = os.getenv("CONDITION_ID")
-    YES_ID = os.getenv("YES_ID")
-    NO_ID = os.getenv("NO_ID")
+    # CONDITION_ID = os.getenv("CONDITION_ID")
+    # YES_ID = os.getenv("YES_ID")
+    # NO_ID = os.getenv("NO_ID")
+
+    CONDITION_ID = "0x8d52fed4ae101977e7807fe97c503bb0124c8a9947e02dd8507b3191bf220d87"
+    YES_ID = "111098511815305333461136150460272626183935263570250422706652341149027899261464"
+    NO_ID = "6075043278597420473413557525708711172563536710949920834070346067873777894873"
 
     # 创建配置
     config = RunnerConfig(

@@ -157,6 +157,7 @@ class MarketMakingRunner:
                     # )
                     # if active_orders:
                     await self.order_manager.cancel_all_orders(self.config.condition_id)
+                    logger.info(f"Cancel all orders")
                     
                     # 下新订单
                     for order in orders:
