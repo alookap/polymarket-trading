@@ -13,6 +13,7 @@ from .order_manager import OrderManager
 from .orderbook import OrderBook
 from .base_market_maker import BaseMarketMaker
 from .simplest_market_maker import SimplestMM
+from .handlers import MarketDataHandler, UserDataHandler
 
 from py_clob_client.client import ClobClient, ApiCreds
 
@@ -61,6 +62,9 @@ class MarketMakingRunner:
         )
         self.order_manager = OrderManager(api_client=self.api_client)
         self.strategy = self._setup_strategy()
+
+        self.market_handler = None
+        self.user_handler = None
         self.ws_manager = self._setup_websocket_manager()
         
         # 设置信号处理
@@ -108,45 +112,25 @@ class MarketMakingRunner:
             yes_id=self.config.yes_id,
             no_id=self.config.no_id
         )
+
+        self.market_handler = MarketDataHandler(
+            order_book=self.order_book,
+            config=self.config
+        )
+
+        self.user_handler = UserDataHandler(
+            order_book=self.order_book,
+            strategy=self.strategy,
+            # order_manager=self.order_manager,
+            config=self.config
+        )
         
         # 添加市场数据处理器
-        ws_manager.add_market_handler(self._create_market_handler())
-        ws_manager.add_user_handler(self._create_user_handler())
+        ws_manager.add_market_handler(self.market_handler)
+        ws_manager.add_user_handler(self.user_handler)
         
         return ws_manager
         
-    def _setup_signal_handlers(self):
-        """设置信号处理器"""
-        if sys.platform == 'win32':
-            signal.signal(signal.SIGINT, lambda s, f: asyncio.create_task(self.stop()))
-            signal.signal(signal.SIGTERM, lambda s, f: asyncio.create_task(self.stop()))
-        else:
-            for sig in (signal.SIGTERM, signal.SIGINT):
-                asyncio.get_event_loop().add_signal_handler(
-                    sig,
-                    lambda: asyncio.create_task(self.stop())
-                )
-                
-    def _create_market_handler(self): ### 需不需要 async def
-        """创建市场数据处理器"""
-        async def handler(data):
-            try:
-                for item in data:
-                    if item.get('asset_id') == self.config.yes_id:
-                        if item.get('event_type') == 'book':
-                            self.order_book.update_book(
-                                item.get('bids'),
-                                item.get('asks')
-                            )
-                        elif item.get('event_type') == 'price_change':
-                            self.order_book.handle_price_change(
-                                item.get('changes')
-                            )
-            except Exception as e:
-                logger.error(f"Error in market handler: {e}", exc_info=True)
-                await self.stop()
-                
-        return handler
         
     def _create_user_handler(self): ### 需不需要async def? 不需要放在这里？
         """创建用户数据处理器"""
