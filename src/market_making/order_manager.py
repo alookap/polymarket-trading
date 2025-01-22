@@ -29,7 +29,7 @@ class OrderManager:
         """在线程池中异步运行同步函数"""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, func, *args, **kwargs)
-
+    
     async def place_order(self, request: OrderRequest) -> str:
         """
         提交订单并返回 order_id
@@ -90,7 +90,8 @@ class OrderManager:
         取消特定市场的所有订单
         """
         try:
-            await self._run_in_executor(self.api_client.cancel_market_orders, market_id)
+            cancel_resp = await self._run_in_executor(self.api_client.cancel_market_orders, market_id)
+            self._remove_order(cancel_resp['canceled'])
             ### cancel id from active_orders & market_orders
         except Exception as e:
             self.logger.error(f"Failed to cancel order at market: {e}")

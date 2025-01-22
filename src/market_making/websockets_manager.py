@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import websockets
-from typing import List, Dict, Any, Optional
+from typing import Optional, Dict, Any, List, Tuple, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class WebsocketManager:
         while self.running and self.market_ws:
             try:
                 message = await self.market_ws.recv()
-                data = json.loads(message)
+                data = json.loads(message) # May have some delay
                 
                 # Check for price change events
                 if data and isinstance(data, list): # and data[0].get('event_type') == "price_change":

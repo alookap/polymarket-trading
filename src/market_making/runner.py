@@ -160,9 +160,15 @@ class MarketMakingRunner:
                     logger.info(f"Cancel all orders")
                     
                     # 下新订单
+                    tasks = []
                     for order in orders:
-                        order_id = await self.order_manager.place_order(order)
-                        logger.info(f"Placed order: {order_id}")
+                        tasks.append(asyncio.create_task(self.order_manager.place_order(order)))
+
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
+                    logger.info(f"Placed order: {results}")
+
+                    # for order in orders:
+                    #     order_id = await self.order_manager.place_order(order)                       
                         
             except Exception as e:
                 logger.error(f"Error in strategy loop: {e}", exc_info=True)
