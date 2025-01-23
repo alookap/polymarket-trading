@@ -16,7 +16,7 @@ class OrderRequest:
     side: str
     price: Decimal
     size: Decimal
-    size_at_level: Decimal
+    size_at_level: Decimal # sequence info
     market_id: str
     asset_id: str
     yes_asset_id: str
@@ -24,6 +24,8 @@ class OrderRequest:
 @dataclass
 class Order:
     id: str
+    yes_side: str
+    yes_price: str
     request: OrderRequest
     status: str
     timestamp: int

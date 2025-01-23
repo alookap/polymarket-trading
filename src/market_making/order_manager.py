@@ -21,7 +21,7 @@ class OrderManager:
     def __init__(self, api_client):
         self.api_client = api_client
         self.active_orders: Dict[str, Order] = {}  # order_id -> Order
-        self.market_orders: Dict[str, List[str]] = {}  # market_id -> price -> [order_id] ##? 怎么分别判断yes and no sides?
+        self.market_orders: Dict[str, Dict[str, List[str]]] = {}  # market_id -> side -> [order_id] ##? 怎么分别判断yes and no sides?
         self.logger = logging.getLogger(__name__)
         self.executor = ThreadPoolExecutor(max_workers=5)  # 创建线程池
 
@@ -115,8 +115,17 @@ class OrderManager:
         """
         Add an order to tracking lists
         """
+        if request.asset_id == request.yes_asset_id:
+            yes_side = request.side
+            yes_price = request.price
+        else:
+            yes_side = {'BUY': 'SELL', 'SELL': 'BUY'}[request.side]
+            yes_price = 1-request.price
+        
         order = Order(
             id=order_id,
+            yes_side=yes_side,
+            yes_price=yes_price,
             request=request, 
             status='ACTIVE',
             timestamp=int(asyncio.get_event_loop().time()) # 额外添加
@@ -125,8 +134,9 @@ class OrderManager:
 
         market_id = request.market_id
         if market_id not in self.market_orders:
-            self.market_orders[market_id] = []
-        self.market_orders[market_id].append(order_id) ### 有没有必要改成双层索引？可以marginal提速
+            self.market_orders[market_id] = {'BUY': [], 'SELL': []}
+
+        self.market_orders[market_id][yes_side].append(order_id) # indexed by market_id & direction
 
     def _remove_order(self, order_ids: Union[str, List[str]]):
         """
@@ -138,16 +148,32 @@ class OrderManager:
             if order_id in self.active_orders:
                 order = self.active_orders.pop(order_id) # 复杂度多少
                 market_id = order.request.market_id
+                yes_side = order.yes_side
                 if market_id in self.market_orders:
-                    self.market_orders[market_id].remove(order_id)
+                    self.market_orders[market_id][yes_side].remove(order_id)
                     # 最后一个元素remove掉需不需要删除？从实际场景考虑不删除更好
                     # remove followed by add func
 
-    def get_active_orders(self, market_id: str) -> List[Order]: ### token_id 
+    def get_active_orders(self, market_id: str, side: str = "ALL") -> List[Order]:
         """
-        Get active orders for a specific market
+        Get active orders for a specific market.
+        
+        :param market_id: The market ID to filter orders.
+        :param side: The order side to filter ("BUY", "SELL", or "ALL").
+        :return: List of active orders matching the criteria.
         """
-        order_ids = self.market_orders.get(market_id, [])
+        if market_id not in self.market_orders:
+            return []
+
+        if side == "ALL":
+            order_ids = self.market_orders[market_id].get('YES', []) + self.market_orders[market_id].get('NO', [])
+        elif side == "BUY":
+            order_ids = self.market_orders[market_id].get('YES', [])  # "YES" is treated as "BUY"
+        elif side == "SELL":
+            order_ids = self.market_orders[market_id].get('NO', [])  # "NO" is treated as "SELL"
+        else:
+            raise ValueError(f"Invalid side '{side}', must be 'BUY', 'SELL', or 'ALL'.")
+
         return [self.active_orders[oid] for oid in order_ids if oid in self.active_orders]
     
 
