@@ -6,6 +6,7 @@ from decimal import Decimal
 from dotenv import load_dotenv
 
 from .runner import MarketMakingRunner, RunnerConfig
+from decimal import getcontext, Decimal
 
 def setup_logging():
     logging.basicConfig(
@@ -17,6 +18,8 @@ async def main():
     # 加载环境变量（如果你用 dotenv）
     load_dotenv()
     setup_logging()
+
+    getcontext().prec = 4 # Decimal最大precision
 
     # 从环境变量读取（或者直接硬编码）
     PRIVATE_KEY = os.getenv("PK", "0x...")
