@@ -25,7 +25,9 @@ class OrderRequest:
 class Order:
     id: str
     yes_side: str
-    yes_price: str
+    yes_price: Decimal
+    remaining_size: Decimal
+    size_at_level: Decimal
     request: OrderRequest
     status: str
     timestamp: int

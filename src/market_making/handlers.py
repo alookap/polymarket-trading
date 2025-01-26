@@ -30,7 +30,7 @@ class MarketDataHandler:
 
 
 class UserDataHandler:
-    def __init__(self, order_book, strategy, config):
+    def __init__(self, order_book, strategy, order_manager, config):
         """
         :param order_book: 维护 yes_position / no_position 的对象
         :param strategy:    需要根据最新仓位更新策略的对象
@@ -38,6 +38,7 @@ class UserDataHandler:
         """
         self.order_book = order_book
         self.strategy = strategy
+        self.order_manager = order_manager
         self.config = config
     
     async def __call__(self, data):
@@ -52,13 +53,24 @@ class UserDataHandler:
                     await self._handle_trade(item)
                     
                     # 每处理完一笔更新策略持仓
-                    new_position = self.order_book.get_total_position()
+                    # new_position = self.order_book.get_total_position()
                     # self.strategy.update_position(new_position)
+                elif (item.get('event_type') == 'order'
+                    and item.get('asset_id') in {self.config.yes_id, self.config.no_id}
+                    and item.get('type') == 'UPDATE'
+                    and item.get('size_matched') != "0"):
+
+                    await self._handle_order_filled(item)  
                     
         except Exception as e:
             logger.error(f"Error in user handler: {e}", exc_info=True)
             raise  # 如果想在外部捕捉这里的异常，可以在 Runner 做异常处理
-    
+
+    async def _handle_order_filled(self, order_data):
+        """handle with order_filled information"""
+        size_matched = Decimal(order_data["size_matched"])
+        await self.order_manager.handle_order_filled(order_id=order_data["id"], size_matched=size_matched)
+        
     async def _handle_trade(self, trade_data):
         """统一处理一笔 trade 数据"""
         taker_asset_id = trade_data.get('asset_id')

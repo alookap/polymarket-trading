@@ -99,7 +99,7 @@ class OrderManager:
 
     async def handle_order_update(self, response: OrderResponse): # 在order filled之后调用 ### 这里怎么用？
         """
-        处理订单状态更新
+        处理订单状态更新, 如果挂单fail之类的情况，暂时没有用到
         """
         order_id = response.order_id
         status = response.status
@@ -111,6 +111,32 @@ class OrderManager:
             if status in ['FILLED', 'CANCELED', 'REJECTED']: ### CANCELED & REJECTED 我可能本来就会count in, so double count in user channel
                 self._remove_order(order_id)
 
+    async def handle_order_filled(self, order_id: str, size_matched: Decimal): # 在order filled之后调用
+        """
+        处理订单状态更新, 如果挂单被成交/部分成交
+        """
+        if order_id in self.active_orders:
+            order = self.active_orders[order_id]
+            if order.remaining_size <= size_matched:
+                if order.remaining_size < size_matched:
+                    logging.warning(
+                    f"Order {order_id} filled more than remaining size! "
+                    f"Remaining: {order.remaining_size}, Filled: {size_matched}"
+                )
+                elif order.remaining_size == size_matched:
+                    logging.info(f"Order {order_id} fully filled and removed from tracker.")
+                self._remove_order(order_id)
+                
+            else:
+                order.remaining_size -= size_matched
+                logging.info(f"Order {order_id} partially filled with {order.remaining_size} remaining")
+                order.size_at_level = 0
+
+        else:
+            logging.warning(
+                    f"Order {order_id} not in track while getting filled! "
+                )
+
     def _add_order(self, order_id: str, request: OrderRequest):
         """
         Add an order to tracking lists
@@ -121,11 +147,13 @@ class OrderManager:
         else:
             yes_side = {'BUY': 'SELL', 'SELL': 'BUY'}[request.side]
             yes_price = 1-request.price
-        
+
         order = Order(
             id=order_id,
             yes_side=yes_side,
             yes_price=yes_price,
+            remaining_size = request.size,
+            size_at_level = request.size_at_level,
             request=request, 
             status='ACTIVE',
             timestamp=int(asyncio.get_event_loop().time()) # 额外添加
@@ -143,7 +171,7 @@ class OrderManager:
         Remove one or more orders from tracking lists.
         """
         if isinstance(order_ids, str):
-            order_ids = [order_ids]
+            order_ids = [order_ids] # not perfect efficient
         for order_id in order_ids:
             if order_id in self.active_orders:
                 order = self.active_orders.pop(order_id) # 复杂度多少
@@ -175,5 +203,8 @@ class OrderManager:
             raise ValueError(f"Invalid side '{side}', must be 'BUY', 'SELL', or 'ALL'.")
 
         return [self.active_orders[oid] for oid in order_ids if oid in self.active_orders]
+    
+    def get_order_by_id(self, order_id: str) -> Optional[Order]:
+        return self.active_orders.get(order_id, None)
     
 
